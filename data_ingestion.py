@@ -1,9 +1,8 @@
 import os
 from dotenv import load_dotenv
 from langchain_community.document_loaders import TextLoader
-
+import google.generativeai as genai
 load_dotenv()
-
 # os.environ['OPENAI_API_KEY']=os.getenv("OPENAI_API_KEY")
 # text documents loader
 loader = TextLoader("speech.txt")
@@ -58,4 +57,13 @@ class CustomEmbeddings:
 db = Chroma.from_documents(documents, CustomEmbeddings())
 query = "Who are the authors of attention is all you need?"
 retireved_results=db.similarity_search(query)
-print(retireved_results[0].page_content)
+
+# print(retireved_results[0].page_content)
+# raise "test"
+content = retireved_results[0].page_content
+prompt = f"Find the best answer from below doucments:{content}, query:{query}"
+print(prompt)
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+model = genai.GenerativeModel('gemini-1.5-flash')
+response = model.generate_content(prompt)
+print(response.text)
